@@ -1,45 +1,38 @@
-import express from 'express';
-import fetch from 'node-fetch';
-import dotenv from 'dotenv';
-import cors from 'cors';
+const express = require("express");
+const cors = require("cors");
+const bodyParser = require("body-parser");
+const axios = require("axios");
 
-dotenv.config();
 const app = express();
-const PORT = process.env.PORT || 3001;
-
 app.use(cors());
-app.use(express.json());
+app.use(bodyParser.json());
 
-const OPENAI_KEY = process.env.OPENAI_KEY;
+// 🔐 Вставь свой OpenAI API-ключ здесь
+const OPENAI_API_KEY = "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"; // или process.env.OPENAI_KEY из .env
 
-app.post('/gpt', async (req, res) => {
+app.post("/gpt", async (req, res) => {
   try {
-    const { messages } = req.body;
-
-    const openaiResponse = await fetch('https://api.openai.com/v1/chat/completions', {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${OPENAI_KEY}`,
-        'Content-Type': 'application/json'
+    const response = await axios.post(
+      "https://api.openai.com/v1/chat/completions",
+      {
+        model: "gpt-4o",
+        messages: req.body.messages
       },
-      body: JSON.stringify({
-        model: 'gpt-4o',
-        messages
-      })
-    });
-
-    const data = await openaiResponse.json();
-    res.status(200).json(data);
+      {
+        headers: {
+          Authorization: `Bearer ${OPENAI_API_KEY}`,
+          "Content-Type": "application/json"
+        }
+      }
+    );
+    res.json(response.data);
   } catch (error) {
-    console.error('Error calling OpenAI:', error);
-    res.status(500).json({ error: 'Internal Server Error' });
+    console.error("OpenAI error:", error.response?.data || error.message);
+    res.status(500).json({ error: "Failed to connect to OpenAI" });
   }
 });
 
-app.get('/', (_, res) => {
-  res.send('🧠 OpenAI Proxy is running');
-});
-
-app.listen(PORT, () => {
-  console.log(`✅ Proxy server running on http://localhost:${PORT}`);
+const PORT = process.env.PORT || 10000;
+app.listen(PORT, "0.0.0.0", () => {
+  console.log(`✅ Proxy server running at http://0.0.0.0:${PORT}`);
 });
