@@ -8,7 +8,7 @@ app.use(cors());
 app.use(bodyParser.json());
 
 // 🔐 Вставь свой OpenAI API-ключ здесь
-const OPENAI_API_KEY = "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"; // или process.env.OPENAI_KEY из .env
+const OPENAI_API_KEY = ""; // или process.env.OPENAI_KEY из .env
 
 app.post("/gpt", async (req, res) => {
   try {
